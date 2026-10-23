@@ -178,6 +178,66 @@
       .photo-grid { grid-template-columns: 1fr; }
       .panel { padding: 13px; }
     }
+    
+/* Animazione Poké Ball durante il caricamento */
+.loading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 8px;
+  text-align: center;
+  color: #8fcaff;
+}
+
+.pokeball-spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid #f4f7fb;
+  background: linear-gradient(
+    to bottom,
+    #ff4148 0%,
+    #ff4148 46%,
+    #151b27 46%,
+    #151b27 54%,
+    #f7f9ff 54%,
+    #f7f9ff 100%
+  );
+  box-shadow: 0 0 18px #258bff99;
+  animation: pokeball-spin 1s linear infinite;
+}
+
+.pokeball-spinner::before {
+  content: "";
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  background: #fff;
+  border: 5px solid #151b27;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 0 0 2px #a9b8cc;
+}
+
+@keyframes pokeball-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pokeball-spinner { animation: none; }
+}
+
   </style>
 </head>
 <body>
@@ -196,6 +256,12 @@
       <div class="photo-box">
         <label for="frontPhoto">Fronte della carta</label>
         <input id="frontPhoto" type="file" accept="image/*">
+          
+<div id="frontLoading" class="loading-area hidden">
+  <div class="pokeball-spinner"></div>
+  <div class="loading-text">Sto caricando il fronte...</div>
+</div>
+
         <img id="frontPreview" class="hidden" alt="Anteprima fronte">
         <p id="frontInfo" class="muted">Nessuna foto caricata.</p>
       </div>
@@ -203,6 +269,12 @@
       <div class="photo-box">
         <label for="backPhoto">Retro della carta</label>
         <input id="backPhoto" type="file" accept="image/*">
+          
+<div id="backLoading" class="loading-area hidden">
+  <div class="pokeball-spinner"></div>
+  <div class="loading-text">Sto caricando il retro...</div>
+</div>
+
         <img id="backPreview" class="hidden" alt="Anteprima retro">
         <p id="backInfo" class="muted">Nessuna foto caricata.</p>
       </div>
@@ -364,6 +436,12 @@
 
     input.addEventListener("change", () => {
       const file = input.files && input.files[0];
+      
+const loading = document.getElementById(
+  side.file === "frontPhoto" ? "frontLoading" : "backLoading"
+);
+loading.classList.remove("hidden");
+
 
       if (!file) {
         preview.removeAttribute("src");
@@ -382,6 +460,8 @@
       const reader = new FileReader();
 
       reader.onload = () => {
+        
+        loading.classList.add("hidden");
         preview.src = reader.result;
         preview.classList.remove("hidden");
 
@@ -404,6 +484,9 @@
       };
 
       reader.onerror = () => {
+      
+        loading.classList.add("hidden");
+
         info.textContent = "Impossibile leggere questa immagine.";
       };
 
