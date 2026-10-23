@@ -2,651 +2,798 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <title>Pokémon Card Grader</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #101827;
-      --panel: #1b2638;
-      --border: #35445b;
-      --text: #f4f7fb;
-      --muted: #b8c4d6;
-      --accent: #ffd34e;
-      --blue: #73b7ff;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#bd3038">
+<title>PokeGrad - Pokémon Card Grader</title>
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 18px;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    main {
-      max-width: 720px;
-      margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: var(--muted);
-      margin-top: 0;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-
-    h2 { margin-top: 0; font-size: 1.2rem; }
-    h3 { font-size: 1rem; }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin: 12px 0 6px;
-    }
-
-    input[type="file"],
-    input[type="number"],
-    select,
-    button {
-      width: 100%;
-      font: inherit;
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    input, select {
-      background: #0e1725;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    input[type="range"] {
-      padding: 0;
-      accent-color: var(--accent);
-    }
-
-    button {
-      border: 0;
-      background: var(--accent);
-      color: #171717;
-      font-weight: 800;
-      margin-top: 12px;
-      cursor: pointer;
-    }
-
-    .photo-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .photo-box {
-      min-width: 0;
-      background: #0e1725;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    .photo-box img {
-      display: block;
-      width: 100%;
-      max-height: 320px;
-      object-fit: contain;
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-
-    .hidden { display: none !important; }
-
-    .muted { color: var(--muted); font-size: .92rem; }
-
-    .result {
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 12px;
-      background: #252b32;
-    }
-
-    .ratio {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    .check-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      margin: 12px 0;
-    }
-
-    .check-row input {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-      margin-top: 3px;
-      accent-color: var(--accent);
-    }
-
-    .warning {
-      background: #3b2d16;
-      border: 1px solid #8e6c26;
-      padding: 12px;
-      border-radius: 10px;
-      color: #ffe6a3;
-    }
-
-    .good {
-      color: #91e6ad;
-    }
-
-    .bad {
-      color: #ffb2a8;
-    }
-
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: .82rem;
-      padding: 20px 0;
-    }
-
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      .photo-grid { grid-template-columns: 1fr; }
-      .panel { padding: 13px; }
-    }
-    
-/* Animazione Poké Ball durante il caricamento */
-.loading-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 8px;
-  text-align: center;
-  color: #8fcaff;
+<style>
+:root {
+  --red: #bd3038;
+  --red-dark: #751e27;
+  --green: #b8ed8b;
+  --green-dark: #19291d;
+  --green-light: #d8f5c4;
+  --case: #252927;
+  --text: #f5f3df;
+  --muted: #c5d0bc;
+  --border: #657d5c;
 }
 
-.pokeball-spinner {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 12px;
+  background: #191b1a;
+  color: var(--text);
+  font-family: "Courier New", monospace;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+header {
   position: relative;
   overflow: hidden;
-  border: 3px solid #f4f7fb;
-  background: linear-gradient(
-    to bottom,
-    #ff4148 0%,
-    #ff4148 46%,
-    #151b27 46%,
-    #151b27 54%,
-    #f7f9ff 54%,
-    #f7f9ff 100%
-  );
-  box-shadow: 0 0 18px #258bff99;
-  animation: pokeball-spin 1s linear infinite;
+  padding: 18px 14px;
+  margin-bottom: 16px;
+  text-align: center;
+  background: var(--red);
+  border: 4px solid var(--red-dark);
+  border-radius: 15px 15px 5px 5px;
+  box-shadow: inset 0 0 0 2px #e95a5e;
 }
 
-.pokeball-spinner::before {
+.header-light {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.light {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid #252525;
+}
+
+.light.blue { background: #59c9ff; }
+.light.yellow { background: #f9d34b; }
+.light.green { background: #72e477; }
+
+h1 {
+  margin: 0;
+  font-size: clamp(24px, 7vw, 36px);
+  line-height: 1.3;
+  letter-spacing: 2px;
+  font-weight: 900;
+  text-shadow: 2px 2px 0 #702128;
+}
+
+header p {
+  margin: 7px 0 0;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #ffe6c8;
+}
+
+.panel {
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #303632;
+  border: 3px solid #151816;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 2px #59625b;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  background: var(--green);
+  color: #102014;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.section-title .number {
+  flex-shrink: 0;
+  background: #132016;
+  color: var(--green);
+  padding: 2px 5px;
+}
+
+h3 {
+  margin: 12px 0 7px;
+  color: var(--green);
+  font-size: 15px;
+}
+
+p { overflow-wrap: anywhere; }
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.photo-card {
+  min-width: 0;
+  padding: 9px;
+  background: var(--green-dark);
+  border: 2px dashed #7eac71;
+}
+
+.photo-label {
+  display: block;
+  margin-bottom: 8px;
+  padding: 5px;
+  text-align: center;
+  color: #132016;
+  background: var(--green);
+  font-weight: 900;
+}
+
+input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  padding: 7px;
+  color: var(--green-light);
+  background: #111a13;
+  border: 1px solid #647b5b;
+  font: inherit;
+  font-size: 11px;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  margin-top: 10px;
+  object-fit: contain;
+  background: #111a13;
+  border: 1px solid #4e6649;
+}
+
+.hidden { display: none !important; }
+
+button {
+  display: block;
+  width: 100%;
+  margin-top: 11px;
+  padding: 13px 10px;
+  border: 3px solid #751e27;
+  border-radius: 5px;
+  background: var(--red);
+  color: #fff6dc;
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: inset -3px -3px 0 #8e252e;
+}
+
+button.secondary {
+  background: #414a44;
+  border-color: #202521;
+  box-shadow: inset -3px -3px 0 #303630;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.loading-box {
+  padding: 24px 12px;
+  text-align: center;
+  background: #142218;
+  border: 2px solid var(--border);
+}
+
+.loading-ball {
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 13px;
+  object-fit: contain;
+  animation: spin 1.15s linear infinite;
+}
+
+.css-ball {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 13px;
+  overflow: hidden;
+  border: 3px solid #f4f4e8;
+  border-radius: 50%;
+  background: linear-gradient(
+    to bottom,
+    #171917 0%, #171917 46%,
+    #f5f3df 46%, #f5f3df 100%
+  );
+  animation: spin 1.15s linear infinite;
+}
+
+.css-ball::before {
   content: "";
   position: absolute;
-  width: 19px;
-  height: 19px;
-  background: #fff;
-  border: 5px solid #151b27;
-  border-radius: 50%;
+  left: -3px;
+  right: -3px;
+  top: 44%;
+  height: 9px;
+  background: #171917;
+}
+
+.css-ball::after {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: inset 0 0 0 2px #a9b8cc;
+  border: 3px solid #171917;
+  border-radius: 50%;
+  background: #f5f3df;
 }
 
-@keyframes pokeball-spin {
-  from { transform: rotate(0deg); }
+@keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.loading-text {
+.progress-track {
+  height: 9px;
+  margin: 15px 0 8px;
+  overflow: hidden;
+  background: #344334;
+  border: 1px solid #77916d;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  background: var(--green);
+  transition: width .2s linear;
+}
+
+.progress-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--green-light);
+  font-size: 12px;
+}
+
+.result-box {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--green-dark);
+  color: var(--green-light);
+  border: 1px solid #657d5c;
+  overflow-wrap: anywhere;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #43543e;
+}
+
+.metric:last-child { border-bottom: 0; }
+
+.defects label {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin: 10px 0;
   font-size: 14px;
-  font-weight: 700;
+}
+
+.defects input {
+  margin-top: 4px;
+  accent-color: var(--green);
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  color: var(--green-light);
+  background: #142218;
+  border: 1px solid #657d5c;
+  font: inherit;
+  resize: vertical;
+}
+
+.warning {
+  margin-top: 12px;
+  padding: 10px;
+  color: #f2d6b8;
+  background: #30251d;
+  border-left: 4px solid #e15a5f;
+  font-size: 12px;
+}
+
+footer {
+  padding: 12px 0 25px;
+  color: #aeb8ae;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 390px) {
+  body { padding: 7px; }
+  .panel { padding: 10px; }
+  .photos { gap: 6px; }
+  .photo-card { padding: 6px; }
+  input[type="file"] { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pokeball-spinner { animation: none; }
+  .loading-ball, .css-ball { animation: none; }
+  .progress-fill { transition: none; }
 }
-
-  </style>
+</style>
 </head>
+
 <body>
 <main>
-  <h1>⚡ Pokémon Card Grader</h1>
-  <p class="subtitle">Controlla le foto, il centraggio e i difetti della carta.</p>
 
-  <div class="panel">
-    <h2>1. Carica le foto</h2>
-    <p class="muted">
-      Usa foto nitide, scattate dall'alto, con tutta la carta visibile.
-      Le immagini vengono elaborate nel browser.
-    </p>
+<header>
+  <div class="header-light" aria-hidden="true">
+    <span class="light blue"></span>
+    <span class="light yellow"></span>
+    <span class="light green"></span>
+  </div>
+  <h1>POKEGRAD</h1>
+  <p>POKÉMON CARD ANALYZER</p>
+</header>
 
-    <div class="photo-grid">
-      <div class="photo-box">
-        <label for="frontPhoto">Fronte della carta</label>
-        <input id="frontPhoto" type="file" accept="image/*">
-          
-<div id="frontLoading" class="loading-area hidden">
-  <div class="pokeball-spinner"></div>
-  <div class="loading-text">Sto caricando il fronte...</div>
-</div>
-
-        <img id="frontPreview" class="hidden" alt="Anteprima fronte">
-        <p id="frontInfo" class="muted">Nessuna foto caricata.</p>
-      </div>
-
-      <div class="photo-box">
-        <label for="backPhoto">Retro della carta</label>
-        <input id="backPhoto" type="file" accept="image/*">
-          
-<div id="backLoading" class="loading-area hidden">
-  <div class="pokeball-spinner"></div>
-  <div class="loading-text">Sto caricando il retro...</div>
-</div>
-
-        <img id="backPreview" class="hidden" alt="Anteprima retro">
-        <p id="backInfo" class="muted">Nessuna foto caricata.</p>
-      </div>
-    </div>
-
-    <button id="clearPhotos" type="button">Rimuovi le foto</button>
-    <p id="photoStatus" class="muted" aria-live="polite"></p>
+<section class="panel">
+  <div class="section-title">
+    <span class="number">01</span>
+    CARICA LE FOTO
   </div>
 
-  <div class="panel">
-    <h2>2. Centraggio del fronte</h2>
-    <p class="muted">
-      Misura a occhio lo spazio del bordo sinistro e destro.
-      Inserisci valori relativi: per esempio, se il bordo sinistro
-      sembra largo il doppio del destro, inserisci 2 e 1.
-    </p>
+  <p class="muted">
+    Fotografa la carta dall'alto. Mostra tutti e quattro gli angoli
+    e usa uno sfondo che contrasti con la carta.
+  </p>
 
-    <label for="frontLeft">Bordo sinistro</label>
-    <input id="frontLeft" type="number" min="0.1" max="100" step="0.1" value="1">
+  <div class="photos">
+    <div class="photo-card">
+      <span class="photo-label">FRONTE</span>
+      <input id="front" type="file" accept="image/*">
+      <img id="frontPreview" class="preview hidden" alt="Anteprima fronte">
+      <p id="frontInfo" class="muted">Nessuna foto selezionata.</p>
+    </div>
 
-    <label for="frontRight">Bordo destro</label>
-    <input id="frontRight" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <label for="frontTop">Bordo superiore</label>
-    <input id="frontTop" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <label for="frontBottom">Bordo inferiore</label>
-    <input id="frontBottom" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <div class="result" id="frontCenterResult" aria-live="polite">
-      Inserisci i bordi per calcolare il rapporto.
+    <div class="photo-card">
+      <span class="photo-label">RETRO</span>
+      <input id="back" type="file" accept="image/*">
+      <img id="backPreview" class="preview hidden" alt="Anteprima retro">
+      <p id="backInfo" class="muted">Nessuna foto selezionata.</p>
     </div>
   </div>
 
-  <div class="panel">
-    <h2>3. Centraggio del retro</h2>
-    <p class="muted">
-      Ripeti la stima per il retro. Il risultato dipende dalla precisione
-      delle misure che inserisci.
-    </p>
+  <button id="analyze" type="button">▶ ANALIZZA CARTA</button>
+  <button id="clear" class="secondary" type="button">RIMUOVI LE FOTO</button>
+</section>
 
-    <label for="backLeft">Bordo sinistro</label>
-    <input id="backLeft" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <label for="backRight">Bordo destro</label>
-    <input id="backRight" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <label for="backTop">Bordo superiore</label>
-    <input id="backTop" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <label for="backBottom">Bordo inferiore</label>
-    <input id="backBottom" type="number" min="0.1" max="100" step="0.1" value="1">
-
-    <div class="result" id="backCenterResult" aria-live="polite">
-      Inserisci i bordi per calcolare il rapporto.
-    </div>
+<section id="loading" class="panel loading-box hidden" aria-live="polite">
+  <div id="ballArea">
+    <img
+      id="loadingBall"
+      class="loading-ball hidden"
+      src="pokeball.png"
+      alt=""
+    >
+    <div id="fallbackBall" class="css-ball"></div>
   </div>
 
-  <div class="panel">
-    <h2>4. Controllo dei difetti</h2>
-    <p class="muted">
-      Esamina la carta con buona luce. Seleziona i difetti che noti.
-      Questi controlli sono manuali e non vengono rilevati automaticamente.
-    </p>
+  <strong id="loadingTitle">Sto analizzando la tua carta...</strong>
+  <p id="loadingMessage" class="muted">Esame delle immagini in corso.</p>
 
-    <h3>Fronte</h3>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="front" value="Angoli usurati">
-      <span>Angoli usurati o sbiancati</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="front" value="Bordi danneggiati">
-      <span>Bordi danneggiati o sbiancati</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="front" value="Graffi">
-      <span>Graffi o segni sulla superficie</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="front" value="Macchie">
-      <span>Macchie o sporco</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="front" value="Piega">
-      <span>Piega o danno evidente</span>
-    </label>
-
-    <h3>Retro</h3>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="back" value="Angoli usurati">
-      <span>Angoli usurati o sbiancati</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="back" value="Bordi danneggiati">
-      <span>Bordi danneggiati o sbiancati</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="back" value="Graffi">
-      <span>Graffi o segni sulla superficie</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="back" value="Macchie">
-      <span>Macchie o sporco</span>
-    </label>
-    <label class="check-row">
-      <input type="checkbox" class="defect" data-side="back" value="Piega">
-      <span>Piega o danno evidente</span>
-    </label>
-
-    <label for="notes">Note aggiuntive</label>
-    <textarea id="notes" rows="3"
-      style="width:100%;padding:12px;border-radius:10px;background:#0e1725;color:#f4f7fb;border:1px solid #35445b"
-      placeholder="Descrivi altri difetti che hai notato..."></textarea>
-
-    <button id="makeReport" type="button">Crea riepilogo</button>
-    <div id="report" class="result hidden" aria-live="polite"></div>
+  <div class="progress-track">
+    <div id="progressFill" class="progress-fill"></div>
   </div>
 
-  <div class="panel">
-    <h2>Informazioni importanti</h2>
-    <div class="warning">
-      Questa versione non assegna un voto PSA o un voto automatico da 1 a 10.
-      Il centraggio è stimato manualmente dai valori inseriti.
-      La valutazione professionale considera anche superficie, angoli,
-      bordi e altri fattori. Il risultato non garantisce un voto ufficiale.
-    </div>
-    <p class="muted">
-      Per riferimento, consulta gli standard ufficiali:
-      <a href="https://www.psacard.com/gradingstandards" target="_blank"
-         rel="noopener noreferrer">PSA Grading Standards</a>.
-    </p>
+  <div class="progress-caption">
+    <span id="progressLabel">Preparazione</span>
+    <span id="progressPercent">0%</span>
+  </div>
+</section>
+
+<section id="results" class="panel hidden">
+  <div class="section-title">
+    <span class="number">03</span>
+    RIEPILOGO
+  </div>
+  <div id="resultContent"></div>
+</section>
+
+<section class="panel">
+  <div class="section-title">
+    <span class="number">02</span>
+    NOTE SUI DIFETTI
   </div>
 
-  <footer>
-    Prototipo offline • Le foto non vengono caricate su un server da questa pagina.
-  </footer>
+  <p class="muted">
+    Segna eventuali difetti che noti. Queste selezioni sono manuali
+    e vengono riportate nel riepilogo, ma non sono rilevate automaticamente.
+  </p>
+
+  <div class="defects">
+    <label><input type="checkbox" class="defect" value="Angoli usurati"> Angoli usurati o sbiancati</label>
+    <label><input type="checkbox" class="defect" value="Bordi danneggiati"> Bordi danneggiati</label>
+    <label><input type="checkbox" class="defect" value="Graffi"> Graffi o segni sulla superficie</label>
+    <label><input type="checkbox" class="defect" value="Macchie"> Macchie o sporco</label>
+    <label><input type="checkbox" class="defect" value="Piega"> Piega o danno evidente</label>
+  </div>
+
+  <label for="notes">NOTE AGGIUNTIVE</label>
+  <textarea id="notes" rows="3" placeholder="Altri dettagli che hai notato..."></textarea>
+</section>
+
+<footer>
+  POKEGRAD • PROTOTIPO SPERIMENTALE<br>
+  Stima indicativa, non un voto PSA ufficiale.
+</footer>
 </main>
 
 <script>
-  const sides = [
-    {
-      name: "Fronte",
-      file: "frontPhoto",
-      preview: "frontPreview",
-      info: "frontInfo"
-    },
-    {
-      name: "Retro",
-      file: "backPhoto",
-      preview: "backPreview",
-      info: "backInfo"
-    }
-  ];
+const $ = id => document.getElementById(id);
 
-  function setupPhoto(side) {
-    const input = document.getElementById(side.file);
-    const preview = document.getElementById(side.preview);
-    const info = document.getElementById(side.info);
+const photos = {
+  front: null,
+  back: null
+};
 
-    input.addEventListener("change", () => {
-      const file = input.files && input.files[0];
-      
-const loading = document.getElementById(
-  side.file === "frontPhoto" ? "frontLoading" : "backLoading"
-);
-loading.classList.remove("hidden");
+let busy = false;
 
+function showLoading(title, message, percent, label) {
+  $("loading").classList.remove("hidden");
+  $("loadingTitle").textContent = title;
+  $("loadingMessage").textContent = message;
+  $("progressFill").style.width = percent + "%";
+  $("progressPercent").textContent = percent + "%";
+  $("progressLabel").textContent = label;
+}
 
-      if (!file) {
-        preview.removeAttribute("src");
-        preview.classList.add("hidden");
-        info.textContent = "Nessuna foto caricata.";
-        updatePhotoStatus();
-        return;
-      }
+function hideLoading() {
+  $("loading").classList.add("hidden");
+  $("analyze").disabled = false;
+  busy = false;
+}
 
-      if (!file.type.startsWith("image/")) {
-        input.value = "";
-        info.textContent = "Seleziona un file immagine valido.";
-        return;
-      }
+function setProgress(percent, label, message) {
+  $("progressFill").style.width = percent + "%";
+  $("progressPercent").textContent = percent + "%";
+  $("progressLabel").textContent = label;
+  $("loadingMessage").textContent = message;
+}
 
-      const reader = new FileReader();
+function loadPhoto(side) {
+  const file = $(side).files[0];
+  const preview = $(side + "Preview");
+  const info = $(side + "Info");
 
-      reader.onload = () => {
-        
-        loading.classList.add("hidden");
-        preview.src = reader.result;
-        preview.classList.remove("hidden");
-
-        const sizeKB = Math.round(file.size / 1024);
-        const image = new Image();
-
-        image.onload = () => {
-          info.textContent =
-            sizeKB + " KB • " + image.naturalWidth + " × " +
-            image.naturalHeight + " pixel";
-          updatePhotoStatus();
-        };
-
-        image.onerror = () => {
-          info.textContent = sizeKB + " KB • Immagine caricata";
-          updatePhotoStatus();
-        };
-
-        image.src = reader.result;
-      };
-
-      reader.onerror = () => {
-      
-        loading.classList.add("hidden");
-
-        info.textContent = "Impossibile leggere questa immagine.";
-      };
-
-      reader.readAsDataURL(file);
-    });
+  if (!file) {
+    photos[side] = null;
+    preview.classList.add("hidden");
+    preview.removeAttribute("src");
+    info.textContent = "Nessuna foto selezionata.";
+    return;
   }
 
-  sides.forEach(setupPhoto);
-
-  function updatePhotoStatus() {
-    const front = document.getElementById("frontPhoto").files[0];
-    const back = document.getElementById("backPhoto").files[0];
-    const status = document.getElementById("photoStatus");
-
-    if (front && back) {
-      status.textContent = "Fronte e retro caricati. Le immagini restano in questa pagina.";
-    } else if (front || back) {
-      status.textContent = "Una foto caricata. Ricorda di aggiungere anche l'altra facciata.";
-    } else {
-      status.textContent = "Carica una foto del fronte e una del retro.";
-    }
+  if (!file.type.startsWith("image/")) {
+    $(side).value = "";
+    photos[side] = null;
+    info.textContent = "Scegli un file immagine valido.";
+    return;
   }
 
-  document.getElementById("clearPhotos").addEventListener("click", () => {
-    sides.forEach(side => {
-      document.getElementById(side.file).value = "";
-      const preview = document.getElementById(side.preview);
-      preview.removeAttribute("src");
-      preview.classList.add("hidden");
-      document.getElementById(side.info).textContent = "Nessuna foto caricata.";
-    });
+  showLoading(
+    "CARICAMENTO FOTO",
+    "Sto leggendo l'immagine...",
+    15,
+    side === "front" ? "FRONTE" : "RETRO"
+  );
 
-    updatePhotoStatus();
-  });
+  const reader = new FileReader();
 
-  function readPositiveNumber(id) {
-    const value = Number(document.getElementById(id).value);
-    return Number.isFinite(value) && value > 0 ? value : null;
-  }
+  reader.onload = () => {
+    const image = new Image();
 
-  function formatRatio(a, b) {
-    const total = a + b;
-    const first = (a / total) * 100;
-    const second = (b / total) * 100;
+    image.onload = () => {
+      photos[side] = image;
+      preview.src = reader.result;
+      preview.classList.remove("hidden");
 
-    return {
-      first: first,
-      second: second,
-      text: first.toFixed(1) + " / " + second.toFixed(1)
+      info.textContent =
+        image.naturalWidth + " × " +
+        image.naturalHeight + " pixel";
+
+      setProgress(100, "COMPLETATO", "Foto caricata.");
+
+      setTimeout(() => {
+        if (!busy) hideLoading();
+      }, 350);
     };
-  }
 
-  function calculateCentering(prefix, outputId) {
-    const left = readPositiveNumber(prefix + "Left");
-    const right = readPositiveNumber(prefix + "Right");
-    const top = readPositiveNumber(prefix + "Top");
-    const bottom = readPositiveNumber(prefix + "Bottom");
-    const output = document.getElementById(outputId);
+    image.onerror = () => {
+      photos[side] = null;
+      info.textContent = "Impossibile leggere questa immagine.";
+      hideLoading();
+    };
 
-    if ([left, right, top, bottom].some(v => v === null)) {
-      output.textContent = "Inserisci valori maggiori di zero per tutti i bordi.";
-      return null;
-    }
+    image.src = reader.result;
+  };
 
-    const horizontal = formatRatio(left, right);
-    const vertical = formatRatio(top, bottom);
+  reader.onerror = () => {
+    photos[side] = null;
+    info.textContent = "Errore durante la lettura.";
+    hideLoading();
+  };
 
-    output.innerHTML =
-      '<p>Sinistra / destra</p>' +
-      '<div class="ratio">' + horizontal.text + '</div>' +
-      '<p>Alto / basso</p>' +
-      '<div class="ratio">' + vertical.text + '</div>' +
-      '<p class="muted">Percentuali relative ai valori inseriti, non misure automatiche della foto.</p>';
+  reader.readAsDataURL(file);
+}
 
-    return { horizontal, vertical };
-  }
+$("front").addEventListener("change", () => loadPhoto("front"));
+$("back").addEventListener("change", () => loadPhoto("back"));
 
-  function updateCentering() {
-    calculateCentering("front", "frontCenterResult");
-    calculateCentering("back", "backCenterResult");
-  }
+$("loadingBall").addEventListener("error", () => {
+  $("loadingBall").classList.add("hidden");
+  $("fallbackBall").classList.remove("hidden");
+});
 
-  [
-    "frontLeft", "frontRight", "frontTop", "frontBottom",
-    "backLeft", "backRight", "backTop", "backBottom"
-  ].forEach(id => {
-    document.getElementById(id).addEventListener("input", updateCentering);
+$("loadingBall").addEventListener("load", () => {
+  $("loadingBall").classList.remove("hidden");
+  $("fallbackBall").classList.add("hidden");
+});
+
+function clearPhotos() {
+  if (busy) return;
+
+  ["front", "back"].forEach(side => {
+    $(side).value = "";
+    $(side + "Preview").removeAttribute("src");
+    $(side + "Preview").classList.add("hidden");
+    $(side + "Info").textContent = "Nessuna foto selezionata.";
+    photos[side] = null;
   });
 
-  updateCentering();
-  updatePhotoStatus();
+  $("results").classList.add("hidden");
+}
 
-  document.getElementById("makeReport").addEventListener("click", () => {
-    const front = calculateCentering("front", "frontCenterResult");
-    const back = calculateCentering("back", "backCenterResult");
-    const checked = Array.from(document.querySelectorAll(".defect:checked"));
-    const frontDefects = checked.filter(item => item.dataset.side === "front");
-    const backDefects = checked.filter(item => item.dataset.side === "back");
-    const notes = document.getElementById("notes").value.trim();
+$("clear").addEventListener("click", clearPhotos);
 
-    const report = document.getElementById("report");
-    report.classList.remove("hidden");
+function createCanvas(image, maxSide = 700) {
+  const scale = Math.min(
+    1,
+    maxSide / Math.max(image.naturalWidth, image.naturalHeight)
+  );
 
-    let html = "<h3>Riepilogo della carta</h3>";
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
 
-    html += "<p><strong>Foto fronte:</strong> " +
-      (document.getElementById("frontPhoto").files.length ? "Caricata" : "Mancante") +
-      "</p>";
-
-    html += "<p><strong>Foto retro:</strong> " +
-      (document.getElementById("backPhoto").files.length ? "Caricata" : "Mancante") +
-      "</p>";
-
-    if (front) {
-      html += "<p><strong>Centraggio fronte, sinistra/destra:</strong> " +
-        front.horizontal.text + "</p>";
-      html += "<p><strong>Centraggio fronte, alto/basso:</strong> " +
-        front.vertical.text + "</p>";
-    } else {
-      html += "<p>Valori del centraggio fronte incompleti o non validi.</p>";
-    }
-
-    if (back) {
-      html += "<p><strong>Centraggio retro, sinistra/destra:</strong> " +
-        back.horizontal.text + "</p>";
-      html += "<p><strong>Centraggio retro, alto/basso:</strong> " +
-        back.vertical.text + "</p>";
-    } else {
-      html += "<p>Valori del centraggio retro incompleti o non validi.</p>";
-    }
-
-    html += "<p><strong>Difetti fronte selezionati:</strong> " +
-      (frontDefects.length
-        ? frontDefects.map(item => item.value).join(", ")
-        : "Nessuno segnalato") + "</p>";
-
-    html += "<p><strong>Difetti retro selezionati:</strong> " +
-      (backDefects.length
-        ? backDefects.map(item => item.value).join(", ")
-        : "Nessuno segnalato") + "</p>";
-
-    if (notes) {
-      html += "<p><strong>Note:</strong> " + escapeHTML(notes).replace(/\n/g, "<br>") + "</p>";
-    }
-
-    html += '<p class="warning">Questo riepilogo non è un voto ufficiale e non predice con certezza un voto PSA.</p>';
-
-    report.innerHTML = html;
-    report.scrollIntoView({ behavior: "smooth", block: "start" });
+  const context = canvas.getContext("2d", {
+    willReadFrequently: true
   });
 
-  function escapeHTML(text) {
-    return text.replace(/[&<>"']/g, character => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    })[character]);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  return { canvas, context };
+}
+
+/*
+  Rilevamento preliminare di bordi ad alto contrasto.
+  Non equivale a riconoscere i quattro angoli della carta.
+*/
+function detectEdges(image) {
+  const { canvas, context } = createCanvas(image);
+  const width = canvas.width;
+  const height = canvas.height;
+  const pixels = context.getImageData(0, 0, width, height).data;
+  const gray = new Uint8Array(width * height);
+
+  for (let i = 0, p = 0; i < pixels.length; i += 4, p++) {
+    gray[p] = Math.round(
+      0.299 * pixels[i] +
+      0.587 * pixels[i + 1] +
+      0.114 * pixels[i + 2]
+    );
   }
+
+  let count = 0;
+  let strong = 0;
+  const step = Math.max(1, Math.floor(Math.min(width, height) / 180));
+
+  for (let y = 1; y < height - 1; y += step) {
+    for (let x = 1; x < width - 1; x += step) {
+      const p = y * width + x;
+
+      const gx = Math.abs(gray[p + 1] - gray[p - 1]);
+      const gy = Math.abs(gray[p + width] - gray[p - width]);
+      const gradient = gx + gy;
+
+      if (gradient > 35) count++;
+      if (gradient > 65) strong++;
+    }
+  }
+
+  return {
+    width,
+    height,
+    count,
+    strong,
+    ok: strong >= 20
+  };
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+function selectedDefects() {
+  return Array.from(document.querySelectorAll(".defect:checked"))
+    .map(item => item.value);
+}
+
+function buildResults(front, back) {
+  const defects = selectedDefects();
+  const notes = $("notes").value.trim();
+
+  let html = "";
+
+  html += '<div class="result-box"><h3>FRONTE</h3>';
+
+  html += front.ok
+    ? "<p>Contorni ad alto contrasto rilevati.</p>"
+    : "<p>Non ho trovato contorni sufficientemente chiari.</p>";
+
+  html += '<div class="metric"><span>Risoluzione</span><strong>' +
+    front.width + " × " + front.height + "</strong></div>";
+
+  html += '<div class="metric"><span>Zone con contrasto rilevato</span><strong>' +
+    front.strong + "</strong></div>";
+
+  html += "</div>";
+
+  html += '<div class="result-box"><h3>RETRO</h3>';
+
+  html += back.ok
+    ? "<p>Contorni ad alto contrasto rilevati.</p>"
+    : "<p>Non ho trovato contorni sufficientemente chiari.</p>";
+
+  html += '<div class="metric"><span>Risoluzione</span><strong>' +
+    back.width + " × " + back.height + "</strong></div>";
+
+  html += '<div class="metric"><span>Zone con contrasto rilevato</span><strong>' +
+    back.strong + "</strong></div>";
+
+  html += "</div>";
+
+  html += '<div class="result-box"><h3>CENTRAGGIO</h3>';
+  html += "<p>Non disponibile: il prototipo non ha ancora riconosciuto in modo affidabile il bordo esterno e il bordo stampato interno. Non vengono inventate percentuali.</p>";
+  html += "</div>";
+
+  html += '<div class="result-box"><h3>DIFETTI ANNOTATI</h3>';
+  html += "<p>" +
+    (defects.length
+      ? defects.map(escapeHTML).join(", ")
+      : "Nessun difetto segnalato manualmente.") +
+    "</p>";
+
+  if (notes) {
+    html += "<p><strong>Note:</strong> " +
+      escapeHTML(notes).replace(/\n/g, "<br>") +
+      "</p>";
+  }
+
+  html += "</div>";
+
+  html += '<div class="warning">VOTO NON DISPONIBILE. Il rilevamento dei contrasti non identifica in modo affidabile graffi, angoli rovinati o centraggio stampato. Serve ulteriore elaborazione e verifica prima di proporre una stima del voto.</div>';
+
+  return html;
+}
+
+$("analyze").addEventListener("click", async () => {
+  if (busy) return;
+
+  $("results").classList.add("hidden");
+
+  if (!photos.front || !photos.back) {
+    $("resultContent").innerHTML =
+      '<div class="warning">Carica sia il fronte sia il retro della carta.</div>';
+    $("results").classList.remove("hidden");
+    return;
+  }
+
+  busy = true;
+  $("analyze").disabled = true;
+
+  showLoading(
+    "ANALISI IN CORSO",
+    "Controllo la foto del fronte...",
+    10,
+    "FASE 1 / 3"
+  );
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const front = detectEdges(photos.front);
+
+    setProgress(
+      50,
+      "FASE 2 / 3",
+      "Controllo la foto del retro..."
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const back = detectEdges(photos.back);
+
+    setProgress(
+      85,
+      "FASE 3 / 3",
+      "Preparo il riepilogo..."
+    );
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    $("resultContent").innerHTML = buildResults(front, back);
+
+    setProgress(
+      100,
+      "COMPLETATO",
+      "Riepilogo pronto."
+    );
+
+    $("results").classList.remove("hidden");
+
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    $("results").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  } catch (error) {
+    $("resultContent").innerHTML =
+      '<div class="warning">Si è verificato un errore. Prova con foto più nitide.</div>';
+    $("results").classList.remove("hidden");
+  } finally {
+    hideLoading();
+  }
+});
 </script>
 </body>
 </html>
